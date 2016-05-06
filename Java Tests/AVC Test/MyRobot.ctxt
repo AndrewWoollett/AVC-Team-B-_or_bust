@@ -1,0 +1,21 @@
+#BlueJ class context
+comment0.params=x\ y
+comment0.target=MyRobot(double,\ double)
+comment0.text=\r\n\ Constructor\ for\ objects\ of\ class\ Robot\r\n
+comment1.params=
+comment1.target=void\ move()
+comment2.params=
+comment2.target=void\ draw()
+comment3.params=deg
+comment3.target=double\ degToRad(double)
+comment4.params=x\ y
+comment4.target=void\ setCor(double,\ double)
+comment5.params=
+comment5.target=double\ getX()
+comment6.params=
+comment6.target=double\ getY()
+comment7.params=newDir
+comment7.target=void\ setDir(double)
+comment8.params=newDir
+comment8.target=void\ addDir(double)
+numComments=9

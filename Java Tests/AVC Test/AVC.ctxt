@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.params=
+comment0.target=AVC()
+comment0.text=\r\n\ Constructor\ for\ objects\ of\ class\ AVC\r\n
+comment1.params=
+comment1.target=void\ correctionFactor()
+comment2.params=
+comment2.target=void\ derivative()
+comment3.params=
+comment3.target=double\ getPeriod()
+comment4.params=
+comment4.target=void\ redraw()
+numComments=5
