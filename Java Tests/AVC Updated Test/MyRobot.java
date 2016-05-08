@@ -11,7 +11,7 @@ public class MyRobot{
     //Fields for moving Robot
     double x,y,dir;
     double radius = 15, speed = 2.0, camersPosition = 20;
-
+    boolean go = true;
     //Constant
     double k=0.01;
 
@@ -49,28 +49,59 @@ public class MyRobot{
 
     }
 
+
     public void calcAngle(){
-        double xL,yL,sum=0,p,d,dSum;
-        for(int i = -75; i <75;i++){
-            xL = camersPosition*Math.cos(degToRad(dir)) - i*Math.cos(degToRad(dir-90)) + x;
-            yL = camersPosition*Math.sin(degToRad(dir)) - i*Math.sin(degToRad(dir-90)) + y;
+        double p,totalSum=0,sum=0,farLeft,nearLeft,farRight,nearRight;
+        for(int a = -1; a<=1; a+=1){
+            int p2 = 30;
+            farLeft = getSum(-75,-p2,a);
+            farRight = getSum(p2,75,a);
+            nearLeft = getSum(-p2+1,0,a);
+            nearRight = getSum(0,p2-1,a);
+            sum=farLeft+farRight+nearLeft+nearRight;
+            totalSum+=sum;
+            if(farLeft==0 && farRight == 0 && nearLeft==0 && nearRight == 0){
+                stopTurn();
+            }
+                 }
+        totalSum/=3;
+
+        addDir(totalSum*k);
+        UI.drawPolygon(polyXD,polyYD,pointNum);
+
+    }
+
+    public void stopTurn(){
+        go=false;
+        double newDir = dir +180;  
+        while(dir < newDir){
+            dir+=5;
+            UI.clearGraphics();
+            this.draw();
+            UI.sleep(25);
+        }
+        go = true;
+    }
+
+    public double getSum(int lowValue, int highValue, int a){
+        double xL,yL,sum=0;
+        for(int i = lowValue; i <=highValue;i++){
+            xL = (camersPosition-a*8)*Math.cos(degToRad(dir)) - i*Math.cos(degToRad(dir-90)) + x;
+            yL = (camersPosition-a*8)*Math.sin(degToRad(dir)) - i*Math.sin(degToRad(dir-90)) + y;
             UI.fillRect(xL ,yL,1,1);
             if(polygon1.contains(xL,yL)){
                 UI.setColor(Color.black);
                 sum += i;
-
             }else{                
                 UI.setColor(Color.white);
             }
 
-            UI.fillRect(i*6 +500,500,6,6);
+            UI.fillRect(i*6 +500,500 +(a*10),6,6);
             UI.setColor(Color.black);
-            UI.drawRect(i*6 +500,500,6,6);
+            UI.drawRect(i*6 +500,500+(a*10),6,6);
+
         }
-
-        addDir(sum*k);
-        UI.drawPolygon(polyXD,polyYD,pointNum);
-
+        return sum;
     }
 
     public void setLine(){
@@ -145,8 +176,10 @@ public class MyRobot{
     }
 
     public void move(){
-        x +=  speed*Math.cos(degToRad(dir));
-        y +=  speed*Math.sin(degToRad(dir));
+        if(go){
+            x +=  speed*Math.cos(degToRad(dir));
+            y +=  speed*Math.sin(degToRad(dir));
+        }
 
     }
 
