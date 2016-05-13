@@ -38,6 +38,28 @@ int v_right = 40;
 int error = 0;
 int proportional_signal = 0;
 
+sPoint = 80;        //Aample piont, where the samle line is split.
+
+/*
+*This method will return the error between 2 given points.
+*/
+int returnError(int lowValue, int highValue){
+    int current_error = 0;
+    int w, s;
+    
+    for (int i=lowValue; i<highValue; i++){
+        w = get_pixel(i, 120, 3);
+
+         if (w > 127){
+            s = 1;
+        } else {
+            s = 0;
+        }
+        error = (i-160)*s;
+        current_error += error;
+    }
+    return current_error;
+}
 
 int main(){
 
@@ -48,8 +70,8 @@ int main(){
     // set all didgital outputs to +5V
     for (int i =0; i < 8; i++){
         // set all digital channels as outputs
-      select_IO(i,0);
-      write_digital(i,1);
+        select_IO(i,0);
+        write_digital(i,1);
     }
 
         set_motor(1,v_left);
@@ -57,62 +79,51 @@ int main(){
 
     while(1)
     {
-       take_picture();      // take camera shot
+        take_picture();      // take camera shot
           
         //summing across image
         error = 0;
-        int w, s;
-                float kp = 0.0035;
-                float kd = 0.002; //change this
-                int current_left_error = 0;
-                int current_right_error = 0;
-                int previous_error = 0;
-                int derivative_signal;
-
-        for (int i=0; i<160; i++){
-                w = get_pixel(i, 120, 3);
-
-                 if (w > 127){
-                        s = 1;
-                } else {
-                        s = 0;
-                }
-                error = (i-160)*s;
-                current_left_error += error;
-        }
+        float kp = 0.0035;
+        float kd = 0.002; //change this
+        int farLeftError = 0;
+        int nearLeftError = 0;
+        int nearRightError = 0;
+        int farRightError = 0;
+        int current_error = 0;
+        int previous_error = 0;
+        int derivative_signal;
         
-               for (int i=160; i<320; i++){
-                w = get_pixel(i, 120, 3);
-
-                 if (w > 127){
-                        s = 1;
-                } else {
-                        s = 0;
-                }
-                error = (i-160)*s;
-                current_right_error += error;
-        }
+        farLeftError = returnError(0,sPoint);
+        nearLeftError = returnError(sPoint,160);
+        nearRightError = returnError(160,160 + sPoint);
+        farRightError = returnError(160 + sPoint,320);
         
-        
-        proportional_signal = (current_left_error + current_right_error)*kp;
-
-        Sleep(0,25);
+        current_error = farLeftError + nearLeftError + nearRightError + farRightError;
+        proportional_signal = current_error*kp;
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
         previous_error = current_error;
 //      printf("Derivative signal is: %d", derivative_signal );
 
-      if (current_right_error == 0 && current_left_error == 0){
-                set_motor(1,-40);
-                set_motor(2,-40);
-                Sleep(1,0);
-                printf("Stop/n");
-}
-
-
+        
+        if (farLeftError == 0 && nearLeftError == 0 && nearRightError == 0 && farRightError == 0){
+            set_motor(1,-40);
+            set_motor(2,-40);
+            Sleep(1,0);
+            printf("Stop/n");
+        }
+        
+        /*
+        *You can put the code for the dead end here, I thik we will need ot take another sample line
+        *closer to the AVC. this will allow us to check if there is nothing at the top and only a 
+        *small part in the bottom.
+        */
 
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
+        
+        //Sleep is last so the motors c=dont update too late.
+        Sleep(0,25);
 
 //        printf("%d\n",error);
     }
