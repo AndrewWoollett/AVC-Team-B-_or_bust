@@ -1,7 +1,0 @@
-        Thursday 12 to-do list:
-1. Check nothing is shorting out.
-2. Conect and find what direction the motors are going.
-3. Remove IR-sensor for now.
-4. Get robot to move in a stright line for a few seconds.
-5. find turning circle and speed/time needed to turn 90 deg.
-6. Add basic PID. 
