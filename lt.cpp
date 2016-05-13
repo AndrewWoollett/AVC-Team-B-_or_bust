@@ -41,12 +41,12 @@ int proportional_signal = 0;
 
 int main(){
 
-    int i;
+    
     init(0);
     // connect camera to the screen
     open_screen_stream();
     // set all didgital outputs to +5V
-    for (i = 0; i < 8; i++){
+    for (int i =0; i < 8; i++){
         // set all digital channels as outputs
       select_IO(i,0);
       write_digital(i,1);
@@ -58,27 +58,18 @@ int main(){
     while(1)
     {
        take_picture();      // take camera shot
-           /*
-       // draw some line
-       set_pixel(100, 55 ,255,0,0);
-       set_pixel(101, 55 ,255,0,0);
-       set_pixel(102, 55 ,255,0,0);
-       set_pixel(10set_motor(1,0);
-           set_motor(2,0);3, 55 ,255,0,0);
-       // display picture
-       update_screen();
-           */
-
+          
         //summing across image
         error = 0;
-        int i, w, s;
+        int w, s;
                 float kp = 0.0035;
                 float kd = 0.002; //change this
-                int current_error = 0;
+                int current_left_error = 0;
+                int current_right_error = 0;
                 int previous_error = 0;
                 int derivative_signal;
 
-        for (i=0; i<320; i++){
+        for (int i=0; i<160; i++){
                 w = get_pixel(i, 120, 3);
 
                  if (w > 127){
@@ -86,11 +77,24 @@ int main(){
                 } else {
                         s = 0;
                 }
-
                 error = (i-160)*s;
-                current_error = current_error + error;
+                current_left_error += error;
         }
-        proportional_signal = current_error*kp;
+        
+               for (int i=160; i<320; i++){
+                w = get_pixel(i, 120, 3);
+
+                 if (w > 127){
+                        s = 1;
+                } else {
+                        s = 0;
+                }
+                error = (i-160)*s;
+                current_right_error += error;
+        }
+        
+        
+        proportional_signal = (current_left_error + current_right_error)*kp;
 
         Sleep(0,25);
 
@@ -98,13 +102,13 @@ int main(){
         previous_error = current_error;
 //      printf("Derivative signal is: %d", derivative_signal );
 
-/*      if (proportional_signal == 0){
+      if (current_right_error == 0 && current_left_error == 0){
                 set_motor(1,-40);
                 set_motor(2,-40);
                 Sleep(1,0);
                 printf("Stop/n");
 }
-*/
+
 
 
         set_motor(1,speed + proportional_signal - derivative_signal);
