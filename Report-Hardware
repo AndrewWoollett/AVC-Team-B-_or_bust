@@ -1,0 +1,11 @@
+I designed the AV to be circular in shape so it could turn around in the maze. 
+I set the camera to be adjustable, both in angle and height so we can adjust it if needed.
+I moved the IR sensors away from the edge so they were not too close to the edge which would result in a wrong number.
+The base of the robot was printed in 2 parts due to the size of the 3D printer. These parts were screwed together not glued, so they could be easily removed, replaced or recycled.
+The wires on the motors were cut to the right length so they didn’t get in the way.
+I did not use tracks because they had to have exact measurements and would be more complicated to manage. 
+I will create a new back wheel, the current one can affect the direction of the AVC.
+The measurements are: length 19.6 cm. width 11 cm. height 13 cm.
+The 3D printer is limited to 12,12,12 cm.
+
+I just read that we shouldn't speak in first or second person. So the first line should be: The AV was designed to be circular in shape so it could turn around in the maze. 
