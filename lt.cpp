@@ -35,18 +35,19 @@ extern "C" int receive_from_server(char message[24]);
 int speed = 45;
 int error = 0;
 int proportional_signal = 0;
+float[][] error = new error[2][4];
 
 int sPoint = 80;        //Aample piont, where the samle line is split.
 
 /*
 *This method will return the error between 2 given points.
 */
-int returnError(int lowValue, int highValue){
+int returnError(int lowValue, int highValue, int height){
     int current_error = 0;
     int w, s;
 
     for (int i=lowValue; i<highValue; i++){
-        w = get_pixel(i, 120, 3);
+        w = get_pixel(i, height, 3);
 
          if (w > 127){
             s = 1;
@@ -58,6 +59,7 @@ int returnError(int lowValue, int highValue){
     }
  return current_error;
 }
+
 int main(){
 
 
@@ -73,7 +75,7 @@ int main(){
 
         set_motor(1,speed);
         set_motor(2,speed);
-
+/*
         //open the gate
         connect_to_server("130.195.6.196", 22);
         char password[24];
@@ -82,7 +84,7 @@ int main(){
         send_to_server(password);
 //      Sleep(2, 0);
         printf("Gate Open");
-
+*/
     while(1)
     {
         take_picture();      // take camera shot
@@ -91,20 +93,19 @@ int main(){
         error = 0;
         float kp = 0.004;
         float kd = 0.001;        //change this
-        float farLeftError = 0;
-        float nearLeftError = 0;
-        float nearRightError = 0;
-        float farRightError = 0;
+        
         float current_error = 0;
         float previous_error = 0;
         int derivative_signal;
+        
+        for(int h = 60; h <= 120; h +=60){
+        error[h][0] = returnError(0,sPoint,h);
+        error[h][1] = returnError(sPoint,160,h);
+        error[h][2] = returnError(160,160 + sPoint,h);
+        error[h][3] = returnError(160 + sPoint,320,h);
+        }
 
-        farLeftError = returnError(0,sPoint);
-        nearLeftError = returnError(sPoint,160);
-        nearRightError = returnError(160,160 + sPoint);
-        farRightError = returnError(160 + sPoint,320);
-
-        current_error = farLeftError + nearLeftError + nearRightError + farRightE$
+        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] 
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
@@ -112,7 +113,7 @@ int main(){
 //      printf("Derivative signal is: %d", derivative_signal );
 
 
-        if (farLeftError == 0 && nearLeftError == 0 && nearRightError == 0 && far$
+        if (error[1] == 0 && error[2] == 0 && error[2] == 0 && error[3]
             set_motor(1,-30);
             set_motor(2,-30);
             Sleep(0,600000);
