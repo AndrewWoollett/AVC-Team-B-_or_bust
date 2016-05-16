@@ -98,14 +98,15 @@ int main(){
         float previous_error = 0;
         int derivative_signal;
         
-        for(int h = 60; h <= 120; h +=60){
-        error[h][0] = returnError(0,sPoint,h);
-        error[h][1] = returnError(sPoint,160,h);
-        error[h][2] = returnError(160,160 + sPoint,h);
-        error[h][3] = returnError(160 + sPoint,320,h);
+        for(int i = 0; i <= 2; i ++){
+            h = i*2 + 60;
+            error[i][0] = returnError(0,sPoint,h);
+            error[i][1] = returnError(sPoint,160,h);
+            error[i][2] = returnError(160,160 + sPoint,h);
+            error[i][3] = returnError(160 + sPoint,320,h);
         }
 
-        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] 
+        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3]; 
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
@@ -113,7 +114,7 @@ int main(){
 //      printf("Derivative signal is: %d", derivative_signal );
 
 
-        if (error[1] == 0 && error[2] == 0 && error[2] == 0 && error[3]
+        if (error[1] == 0 && error[2] == 0 && error[2] == 0 && error[3]){
             set_motor(1,-30);
             set_motor(2,-30);
             Sleep(0,600000);
