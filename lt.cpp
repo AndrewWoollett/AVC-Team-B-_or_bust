@@ -99,7 +99,7 @@ int main(){
         int derivative_signal;
         
         for(int i = 0; i <= 2; i ++){
-            h = i*2 + 60;
+            int h = i*2 + 60;
             error[i][0] = returnError(0,sPoint,h);
             error[i][1] = returnError(sPoint,160,h);
             error[i][2] = returnError(160,160 + sPoint,h);
