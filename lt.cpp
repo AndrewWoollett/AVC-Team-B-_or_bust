@@ -31,11 +31,13 @@ extern "C" int connect_to_server( char server_addr[15],int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
+float kp = 0.004;
+float kd = 0.001;        //change this
 
 int speed = 45;
 int error = 0;
 int proportional_signal = 0;
-float[][] error = new error[2][4];
+float error[2][4];
 
 int sPoint = 80;        //Aample piont, where the samle line is split.
 
@@ -91,8 +93,7 @@ int main(){
 
         //summing across image
         error = 0;
-        float kp = 0.004;
-        float kd = 0.001;        //change this
+        
         
         float current_error = 0;
         float previous_error = 0;
