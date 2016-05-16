@@ -32,13 +32,11 @@ extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
 
-int speed = 40;
-int v_left = 40;
-int v_right = 40;
+int speed = 45;
 int error = 0;
 int proportional_signal = 0;
 
-sPoint = 80;        //Aample piont, where the samle line is split.
+int sPoint = 80;        //Aample piont, where the samle line is split.
 
 /*
 *This method will return the error between 2 given points.
@@ -46,7 +44,7 @@ sPoint = 80;        //Aample piont, where the samle line is split.
 int returnError(int lowValue, int highValue){
     int current_error = 0;
     int w, s;
-    
+
     for (int i=lowValue; i<highValue; i++){
         w = get_pixel(i, 120, 3);
 
@@ -58,12 +56,11 @@ int returnError(int lowValue, int highValue){
         error = (i-160)*s;
         current_error += error;
     }
-    return current_error;
+ return current_error;
 }
-
 int main(){
 
-    
+
     init(0);
     // connect camera to the screen
     open_screen_stream();
@@ -74,54 +71,63 @@ int main(){
         write_digital(i,1);
     }
 
-        set_motor(1,v_left);
-        set_motor(2,v_right);
+        set_motor(1,speed);
+        set_motor(2,speed);
+
+        //open the gate
+        connect_to_server("130.195.6.196", 22);
+        char password[24];
+        send_to_server("Please");
+        receive_from_server(password);
+        send_to_server(password);
+//      Sleep(2, 0);
+        printf("Gate Open");
 
     while(1)
     {
         take_picture();      // take camera shot
-          
+
         //summing across image
         error = 0;
-        float kp = 0.0035;
-        float kd = 0.002; //change this
-        int farLeftError = 0;
-        int nearLeftError = 0;
-        int nearRightError = 0;
-        int farRightError = 0;
-        int current_error = 0;
-        int previous_error = 0;
+        float kp = 0.004;
+        float kd = 0.001;        //change this
+        float farLeftError = 0;
+        float nearLeftError = 0;
+        float nearRightError = 0;
+        float farRightError = 0;
+        float current_error = 0;
+        float previous_error = 0;
         int derivative_signal;
-        
+
         farLeftError = returnError(0,sPoint);
         nearLeftError = returnError(sPoint,160);
         nearRightError = returnError(160,160 + sPoint);
         farRightError = returnError(160 + sPoint,320);
-        
-        current_error = farLeftError + nearLeftError + nearRightError + farRightError;
+
+        current_error = farLeftError + nearLeftError + nearRightError + farRightE$
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
         previous_error = current_error;
 //      printf("Derivative signal is: %d", derivative_signal );
 
-        
-        if (farLeftError == 0 && nearLeftError == 0 && nearRightError == 0 && farRightError == 0){
-            set_motor(1,-40);
-            set_motor(2,-40);
-            Sleep(1,0);
-            printf("Stop/n");
+
+        if (farLeftError == 0 && nearLeftError == 0 && nearRightError == 0 && far$
+            set_motor(1,-30);
+            set_motor(2,-30);
+            Sleep(0,600000);
+            printf("Stop\n");
         }
-        
+
         /*
-        *You can put the code for the dead end here, I thik we will need ot take another sample line
-        *closer to the AVC. this will allow us to check if there is nothing at the top and only a 
+        *You can put the code for the dead end here, I thik we will need ot take $
+        *closer to the AVC. this will allow us to check if there is nothing at th$
         *small part in the bottom.
         */
 
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
-        
+
         //Sleep is last so the motors c=dont update too late.
         Sleep(0,25);
 
@@ -129,9 +135,10 @@ int main(){
     }
 
    // terminate hardware
-    close_screen_stream();
+ close_screen_stream();
     set_motor(1,0);
     set_motor(2,0);
 
     return 0;
 }
+
