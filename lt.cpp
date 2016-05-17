@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -35,7 +34,7 @@ float kp = 0.004;
 float kd = 0.001;        //change this
 
 int speed = 45;
-int error = 0;
+int intError = 0;
 int proportional_signal = 0;
 float error[2][4];
 
@@ -56,8 +55,8 @@ int returnError(int lowValue, int highValue, int height){
         } else {
             s = 0;
         }
-        error = (i-160)*s;
-        current_error += error;
+        intError = (i-160)*s;
+        current_error += intError;
     }
  return current_error;
 }
@@ -92,13 +91,13 @@ int main(){
         take_picture();      // take camera shot
 
         //summing across image
-        error = 0;
-        
-        
+        intError = 0;
+
+
         float current_error = 0;
         float previous_error = 0;
         int derivative_signal;
-        
+
         for(int i = 0; i <= 2; i ++){
             int h = i*2 + 60;
             error[i][0] = returnError(0,sPoint,h);
@@ -107,7 +106,7 @@ int main(){
             error[i][3] = returnError(160 + sPoint,320,h);
         }
 
-        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3]; 
+        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3];
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
