@@ -36,20 +36,19 @@ float kd = 0.001;        //change this
 int speed = 45;
 int intError = 0;
 int proportional_signal = 0;
-float error[2][4];
+float error[3][4];
 
-int sPoint = 80;        //Aample piont, where the samle line is split.
+int sPoint = 80;        //Sample piont, where the sample line is split.
 
 /*
 *This method will return the error between 2 given points.
 */
 int returnError(int lowValue, int highValue, int height){
-    int current_error = 0;
+    float current_error = 0;
     int w, s;
 
     for (int i=lowValue; i<highValue; i++){
         w = get_pixel(i, height, 3);
-
          if (w > 127){
             s = 1;
         } else {
@@ -57,6 +56,7 @@ int returnError(int lowValue, int highValue, int height){
         }
         intError = (i-160)*s;
         current_error += intError;
+    }
     }
  return current_error;
 }
@@ -98,8 +98,8 @@ int main(){
         float previous_error = 0;
         int derivative_signal;
 
-        for(int i = 0; i <= 2; i ++){
-            int h = i*2 + 60;
+        for(int i = 0; i < 3; i ++){
+            int h = i*60 + 60;
             error[i][0] = returnError(0,sPoint,h);
             error[i][1] = returnError(sPoint,160,h);
             error[i][2] = returnError(160,160 + sPoint,h);
@@ -111,25 +111,33 @@ int main(){
 
         derivative_signal = (current_error-previous_error/0.1)*kd;
         previous_error = current_error;
-//      printf("Derivative signal is: %d", derivative_signal );
 
-
-        if (error[1] == 0 && error[2] == 0 && error[2] == 0 && error[3]){
-            set_motor(1,-30);
-            set_motor(2,-30);
+        //turn left at a T junction
+        if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0$
+        set_motor(1,-50);
+        set_motor(2,50);
+        Sleep(2,00);
+        printf("t-junction\n");
+        }else if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3$
+        set_motor(1,-50);
+        set_motor(2,50);
+        Sleep(4,00);
+         printf("turn\n");
+        }else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][$
+            set_motor(1,-50);
+            set_motor(2,-50);
             Sleep(0,600000);
             printf("Stop\n");
         }
 
-        /*
-        *You can put the code for the dead end here, I thik we will need ot take $
-        *closer to the AVC. this will allow us to check if there is nothing at th$
-        *small part in the bottom.
-        */
-
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
 
+//      printf("%f\n", error[0][0]);
+        //Sleep is last so the motors c=dont update too late.
+        Sleep(0,25);
+
+//        printf("%d\n",error);
         //Sleep is last so the motors c=dont update too late.
         Sleep(0,25);
 
