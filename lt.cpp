@@ -67,30 +67,28 @@ int main(){
     open_screen_stream();
     // set all didgital outputs to +5V
     for (int i =0; i < 8; i++){
-        // set all digital channels as outputs
-        select_IO(i,0);
-        write_digital(i,1);
+    // set all digital channels as outputs
+    select_IO(i,0);
+    write_digital(i,1);
     }
 
-        set_motor(1,speed);
-        set_motor(2,speed);
+    set_motor(1,speed);
+    set_motor(2,speed);
 
-        //open the gate
-        connect_to_server("130.195.6.196", 1024);
-        char password[24];
-        send_to_server("Please");
-        receive_from_server(password);
-        send_to_server(password);
-        Sleep(1, 0);
-        printf("Gate Open");
+    //open the gate
+    connect_to_server("130.195.6.196", 1024);
+    char password[24];
+    send_to_server("Please");
+    receive_from_server(password);
+    send_to_server(password);
+    Sleep(1, 0);
+    printf("Gate Open");
 
-    while(1)
-    {
-        take_picture();      // take camera shot
-
+    while(1){
+    	// take camera shot
+        take_picture();      
         //summing across image
         intError = 0;
-
         float current_error = 0;
         float previous_error = 0;
         int derivative_signal;
@@ -111,19 +109,19 @@ int main(){
 
         //turn left at a T junction
         if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
-		error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0){
+	error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0){
 		set_motor(1,-50);
 		set_motor(2,50);
 		Sleep(2,00);			
 		printf("t-junction\n");
         }else if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
-		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
+	error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
 		set_motor(1,-50);
 		set_motor(2,50);
 		Sleep(4,00);
 		printf("turn\n");
         }else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && 
-		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
+	error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
                 set_motor(1,-50);
                 set_motor(2,-50);
                 Sleep(0,600000);
