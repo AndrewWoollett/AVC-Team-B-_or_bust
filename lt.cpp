@@ -76,23 +76,22 @@ int main(){
 
         set_motor(1,speed);
         set_motor(2,speed);
-/*
+
         //open the gate
-        connect_to_server("130.195.6.196", 22);
+        connect_to_server("130.195.6.196", 1024);
         char password[24];
         send_to_server("Please");
         receive_from_server(password);
         send_to_server(password);
-//      Sleep(2, 0);
+        Sleep(1, 0);
         printf("Gate Open");
-*/
+
     while(1)
     {
         take_picture();      // take camera shot
 
         //summing across image
         intError = 0;
-
 
         float current_error = 0;
         float previous_error = 0;
@@ -113,17 +112,20 @@ int main(){
         previous_error = current_error;
 
         //turn left at a T junction
-        if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0$
-        set_motor(1,-50);
-        set_motor(2,50);
-        Sleep(2,00);
-        printf("t-junction\n");
-        }else if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3$
-        set_motor(1,-50);
-        set_motor(2,50);
-        Sleep(4,00);
-         printf("turn\n");
-        }else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][$
+        if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
+		error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0){
+			set_motor(1,-50);
+			set_motor(2,50);
+			Sleep(2,00);
+			printf("t-junction\n");
+        }else if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
+		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
+			set_motor(1,-50);
+			set_motor(2,50);
+			Sleep(4,00);
+			printf("turn\n");
+        }else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && 
+		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
             set_motor(1,-50);
             set_motor(2,-50);
             Sleep(0,600000);
@@ -138,17 +140,12 @@ int main(){
         Sleep(0,25);
 
 //        printf("%d\n",error);
-        //Sleep is last so the motors c=dont update too late.
-        Sleep(0,25);
-
-//        printf("%d\n",error);
     }
 
    // terminate hardware
- close_screen_stream();
+    close_screen_stream();
     set_motor(1,0);
     set_motor(2,0);
 
     return 0;
 }
-
