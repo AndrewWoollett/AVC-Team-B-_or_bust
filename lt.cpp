@@ -57,12 +57,10 @@ int returnError(int lowValue, int highValue, int height){
         intError = (i-160)*s;
         current_error += intError;
     }
-    }
  return current_error;
 }
 
 int main(){
-
 
     init(0);
     // connect camera to the screen
@@ -114,22 +112,22 @@ int main(){
         //turn left at a T junction
         if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
 		error[0][0] != 0 && error[0][1] != 0 && error[0][2] != 0 && error[0][3] != 0){
-			set_motor(1,-50);
-			set_motor(2,50);
-			Sleep(2,00);
-			printf("t-junction\n");
+		set_motor(1,-50);
+		set_motor(2,50);
+		Sleep(2,00);			
+		printf("t-junction\n");
         }else if(error[1][0] == 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] == 0 && 
 		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
-			set_motor(1,-50);
-			set_motor(2,50);
-			Sleep(4,00);
-			printf("turn\n");
+		set_motor(1,-50);
+		set_motor(2,50);
+		Sleep(4,00);
+		printf("turn\n");
         }else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && 
 		error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0){
-            set_motor(1,-50);
-            set_motor(2,-50);
-            Sleep(0,600000);
-            printf("Stop\n");
+                set_motor(1,-50);
+                set_motor(2,-50);
+                Sleep(0,600000);
+                printf("Stop\n");
         }
 
         set_motor(1,speed + proportional_signal - derivative_signal);
