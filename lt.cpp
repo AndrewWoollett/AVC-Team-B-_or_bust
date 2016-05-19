@@ -36,7 +36,7 @@ float kd = 0.001;        //tune this
 int speed = 45;
 int intError = 0;
 int proportional_signal = 0;
-float error[3][4];
+float error[4][4];
 
 int sPoint = 80;        //Sample piont, where the sample line is split.
 
@@ -93,17 +93,17 @@ int main(){
         float previous_error = 0;
         int derivative_signal;
 
-        for(int i = 0; i < 3; i ++){
-            int h = i*60 + 80;
+        for(int i = 1; i < 4; i ++){
+            int h = i*60;
             error[i][0] = returnError(0,sPoint,h);
             error[i][1] = returnError(sPoint,160,h);
             error[i][2] = returnError(160,160 + sPoint,h);
             error[i][3] = returnError(160 + sPoint,320,h);
         }
 
-        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] + //possibly remove this line
-                        error[1][0] + error[1][1] + error[1][2] + error[1][3] +
-                        error[2][0] + error[2][1] + error[2][2] + error[2][3];
+        current_error = error[1][0] + error[1][1] + error[1][2] + error[1][3] + //possibly remove this line
+                        error[2][0] + error[2][1] + error[2][2] + error[2][3] +
+                        error[3][0] + error[3][1] + error[3][2] + error[3][3];
 
         proportional_signal = current_error*kp;
 
@@ -111,27 +111,27 @@ int main(){
         previous_error = current_error;
 
         // turn left at a T junction
-        if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 && 
-        error[1][0] != 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] != 0 &&
-        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0){
+        if(error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && 
+        error[2][0] != 0 && error[2][1] != 0 && error[2][2] != 0 && error[2][3] != 0 &&
+        error[3][0] == 0 && (error[3][1] != 0 || error[3][2] != 0) && error[3][3] == 0){
                 set_motor(1,-50);
                 set_motor(2,50);
                 Sleep(0,500000);
                 printf("t-junction\n");
         }
         // turn 180 at dead end
-        else if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0  &&
-        error[1][0] == 0 && (error[1][1] != 0 || error[1][2] != 0) && error[1][3] == 0 &&
-        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0){
+        else if(error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0  &&
+        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0 &&
+        error[3][0] == 0 && (error[3][1] != 0 || error[3][2] != 0) && error[3][3] == 0){
                 set_motor(1,60);
                 set_motor(2,-60);
                 Sleep(1,0);
                 printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
-        else if (error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 &&
-        error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 &&
-        error[2][0] == 0 && error[2][1] == 0 && error[2][2] == 0 && error[2][3] == 0){
+        else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 &&
+        error[2][0] == 0 && error[2][1] == 0 && error[2][2] == 0 && error[2][3] == 0 &&
+        error[3][0] == 0 && error[3][1] == 0 && error[3][2] == 0 && error[3][3] == 0){
                 set_motor(1,-50);
                 set_motor(2,-50);
                 Sleep(1,0);
