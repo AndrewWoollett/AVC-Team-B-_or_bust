@@ -30,8 +30,8 @@ extern "C" int connect_to_server( char server_addr[15],int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
-float kp = 0.004;
-float kd = 0.001;        //change this
+float kp = 0.003;        //tune this
+float kd = 0.001;        //tune this
 
 int speed = 45;
 int intError = 0;
@@ -74,7 +74,7 @@ int main(){
 
     set_motor(1,speed);
     set_motor(2,speed);
-
+/*
     //open the gate
     connect_to_server("130.195.6.196", 1024);
     char password[24];
@@ -83,10 +83,10 @@ int main(){
     send_to_server(password);
     Sleep(1, 0);
     printf("Gate Open");
-
+*/
     while(1){
-    	// take camera shot
-        take_picture();      
+        // take camera shot
+        take_picture();
         //summing across image
         intError = 0;
         float current_error = 0;
@@ -94,55 +94,55 @@ int main(){
         int derivative_signal;
 
         for(int i = 0; i < 3; i ++){
-            int h = i*60 + 60;
+            int h = i*60 + 80;
             error[i][0] = returnError(0,sPoint,h);
             error[i][1] = returnError(sPoint,160,h);
             error[i][2] = returnError(160,160 + sPoint,h);
             error[i][3] = returnError(160 + sPoint,320,h);
         }
-	
-	float totalError0 = error[0][0] + error[0][1] + error[0][2] + error[0][3];
-	float totalError1 = error[1][0] + error[1][1] + error[1][2] + error[1][3];
-	float totalError2 = error[2][0] + error[2][1] + error[2][2] + error[2][3];
-	float middleError1 = error[1][1] + error[1][2];
-	float middleError2 = error[2][1] + error[2][2];
-	
-        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3];
+
+        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] +
+                        error[1][0] + error[1][1] + error[1][2] + error[1][3] +
+                        error[2][0] + error[2][1] + error[2][2] + error[2][3];
+
         proportional_signal = current_error*kp;
 
-        derivative_signal = (current_error-previous_error/0.1)*kd;
+        derivative_signal = (current_error - previous_error / 0.1) * kd;
         previous_error = current_error;
 
         // turn left at a T junction
-        if(totalError0 != 0 && middleError1 != 0 && middleError2 != 0){
-		set_motor(1,-50);
-		set_motor(2,50);
-		Sleep(2,00);			
-		printf("t-junction\n");
+        if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 && //possibly remove this line
+        error[1][0] != 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] != 0 &&
+        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0){
+                set_motor(1,-50);
+                set_motor(2,50);
+                Sleep(0,500000);
+                printf("t-junction\n");
         }
         // turn 180 at dead end
-        else if(totalError0 == 0 && middleError1 != 0 && middleError2 != 0){
-		set_motor(1,-50);
-		set_motor(2,50);
-		Sleep(4,00);
-		printf("turn\n");
+        else if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0  &&
+        error[1][0] == 0 && (error[1][1] != 0 || error[1][2] != 0) && error[1][3] == 0 &&
+        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0){
+                set_motor(1,60);
+                set_motor(2,-60);
+                Sleep(1,0);
+                printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
-        else if (totalError0 == 0 && totalError1 == 0 && totalError2 == 0){
+        else if (error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 &&
+        error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 &&
+        error[2][0] == 0 && error[2][1] == 0 && error[2][2] == 0 && error[2][3] == 0){
                 set_motor(1,-50);
                 set_motor(2,-50);
-                Sleep(0,600000);
+                Sleep(1,0);
                 printf("Stop\n");
         }
 
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
 
-//      printf("%f\n", error[0][0]);
         //Sleep is last so the motors c=dont update too late.
         Sleep(0,25);
-
-//        printf("%d\n",error);
     }
 
    // terminate hardware
