@@ -101,7 +101,7 @@ int main(){
             error[i][3] = returnError(160 + sPoint,320,h);
         }
 
-        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] +
+        current_error = error[0][0] + error[0][1] + error[0][2] + error[0][3] + //possibly remove this line
                         error[1][0] + error[1][1] + error[1][2] + error[1][3] +
                         error[2][0] + error[2][1] + error[2][2] + error[2][3];
 
@@ -111,7 +111,7 @@ int main(){
         previous_error = current_error;
 
         // turn left at a T junction
-        if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 && //possibly remove this line
+        if(error[0][0] == 0 && error[0][1] == 0 && error[0][2] == 0 && error[0][3] == 0 && 
         error[1][0] != 0 && error[1][1] != 0 && error[1][2] != 0 && error[1][3] != 0 &&
         error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0){
                 set_motor(1,-50);
