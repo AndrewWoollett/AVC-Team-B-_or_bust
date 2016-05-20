@@ -36,7 +36,7 @@ float kd = 0.001;        //tune this
 int speed = 45;
 int intError = 0;
 int proportional_signal = 0;
-float error[4][4];
+
 
 int sPoint = 80;        //Sample piont, where the sample line is split.
 
@@ -60,26 +60,26 @@ int returnError(int height){
  return current_error;
 }
 
-void checkAcross(int height){
+bool checkAcross(int height){
     int w, s=0;
     for (int i=20; i<300; i++){
         w = get_pixel(i, height, 3);
         if (w > 127){
         s++;
     }
-    if(s>5){
+    if(s>50){
         return true;
   }
 }
 
-void checkDown(int left){
+bool checkDown(int left){
     int w, s=0;
-    for (int i=20; i<300; i++){
+    for (int i=20; i<220; i++){
         w = get_pixel(left, i, 3);
         if (w > 127){
         s++;
     }
-    if(s>5){
+    if(s>50){
         return true;
   }
 }
@@ -143,6 +143,10 @@ int main(){
 
         // turn left at a T junction
         if(!top() && mid() && bot() && left() && right()){
+                set_motor(1,50);
+                set_motor(2,50);
+                Sleep(0,200000);
+
                 set_motor(1,-50);
                 set_motor(2,50);
                 Sleep(0,500000);
@@ -156,12 +160,25 @@ int main(){
                 printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
-        else if (!top() && !mid() && !bot()){
+        else if (!top() && !mid() && !bot() && !left() && !right()){
                 set_motor(1,-50);
                 set_motor(2,-50);
-                Sleep(1,0);
+                Sleep(0,500000);
                 printf("Stop\n");
+        // turn left at sharp corners.
+        }else if(!top() && mid() && bot() && left() && !right()){
+                set_motor(1,-60); 
+                set_motor(2,60);
+                Sleep(0,200000);
+                printf("Left\n");
+        // turn right  at sharp corners.
+        }else if(!top() && mid() && bot() && !left() && right()){
+                set_motor(1,60); 
+                set_motor(2,-60);
+                Sleep(0,200000); 
+                printf("Right\n");
         }
+
 
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
