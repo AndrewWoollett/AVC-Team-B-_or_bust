@@ -43,11 +43,11 @@ int sPoint = 80;        //Sample piont, where the sample line is split.
 /*
 *This method will return the error between 2 given points.
 */
-int returnError(int lowValue, int highValue, int height){
+int returnError(int height){
     float current_error = 0;
     int w, s;
 
-    for (int i=lowValue; i<highValue; i++){
+    for (int i=0; i<320; i++){
         w = get_pixel(i, height, 3);
          if (w > 127){
             s = 1;
@@ -60,24 +60,44 @@ int returnError(int lowValue, int highValue, int height){
  return current_error;
 }
 
-void checkAcross(int left, int right, height){
-  int w, s=0;
-  
-  for (int i=lowValue; i<highValue; i++){
-    w = get_pixel(i, height, 3);
-     if (w > 127){
+void checkAcross(int height){
+    int w, s=0;
+    for (int i=20; i<300; i++){
+        w = get_pixel(i, height, 3);
+        if (w > 127){
         s++;
     }
     if(s>5){
-      return true;
+        return true;
   }
+}
 
+void checkDown(int left){
+    int w, s=0;
+    for (int i=20; i<300; i++){
+        w = get_pixel(left, i, 3);
+        if (w > 127){
+        s++;
+    }
+    if(s>5){
+        return true;
+  }
 }
 
 boolean top(){
-  
-    
-return false;
+  return checkAcross(60);
+}
+boolean mid(){
+  return checkAcross(120);
+}
+boolean bot(){
+  return checkAcross(180);
+}
+boolean left(){
+  return checkDown(30);
+}
+boolean right (){
+  return checkDown(290);
 }
 
 
@@ -114,37 +134,29 @@ int main(){
         float previous_error = 0;
         int derivative_signal;
 
-        current_error = returnError(0,sPoint,h);
+        current_error = returnError(120);
           
-        }
-
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error - previous_error / 0.1) * kd;
         previous_error = current_error;
 
         // turn left at a T junction
-        if(error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 && 
-        error[2][0] != 0 && error[2][1] != 0 && error[2][2] != 0 && error[2][3] != 0 &&
-        error[3][0] == 0 && (error[3][1] != 0 || error[3][2] != 0) && error[3][3] == 0){
+        if(!top() && mid() && bot() && left() && right()){
                 set_motor(1,-50);
                 set_motor(2,50);
                 Sleep(0,500000);
                 printf("t-junction\n");
         }
         // turn 180 at dead end
-        else if(error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0  &&
-        error[2][0] == 0 && (error[2][1] != 0 || error[2][2] != 0) && error[2][3] == 0 &&
-        error[3][0] == 0 && (error[3][1] != 0 || error[3][2] != 0) && error[3][3] == 0){
+        else if(!top() && !mid() && bot() && left() && right()){
                 set_motor(1,60);
                 set_motor(2,-60);
                 Sleep(1,0);
                 printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
-        else if (error[1][0] == 0 && error[1][1] == 0 && error[1][2] == 0 && error[1][3] == 0 &&
-        error[2][0] == 0 && error[2][1] == 0 && error[2][2] == 0 && error[2][3] == 0 &&
-        error[3][0] == 0 && error[3][1] == 0 && error[3][2] == 0 && error[3][3] == 0){
+        else if (!top() && !mid() && !bot()){
                 set_motor(1,-50);
                 set_motor(2,-50);
                 Sleep(1,0);
