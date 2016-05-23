@@ -59,6 +59,8 @@ int returnError(int height){
     }
  return current_error;
 }
+return false;
+}
 
 bool checkAcross(int height){
     int w, s=0;
@@ -71,7 +73,8 @@ bool checkAcross(int height){
         return true;
   }
 }
-
+return false;
+}
 bool checkDown(int left){
     int w, s=0;
     for (int i=20; i<220; i++){
