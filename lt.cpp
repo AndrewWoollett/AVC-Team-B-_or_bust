@@ -31,15 +31,15 @@ extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
 float kp = 0.003;        //tune this
-float kd = 0.001;        //tune this
+float kd = 0.0012;        //tune this
 
-int speed = 45;
+int speed = 50;
 int intError = 0;
 int proportional_signal = 0;
 
 
 int sPoint = 80;        //Sample piont, where the sample line is split.
-
+bool redStop = false;
 /*
 *This method will return the error between 2 given points.
 */
@@ -59,50 +59,75 @@ int returnError(int height){
     }
  return current_error;
 }
-return false;
-}
 
 bool checkAcross(int height){
     int w, s=0;
-    for (int i=20; i<300; i++){
+    for (int i=40; i<280; i++){
         w = get_pixel(i, height, 3);
-        if (w > 127){
+        if (w > 130){
         s++;
     }
-    if(s>50){
+    if(s>30){
         return true;
   }
 }
 return false;
 }
-bool checkDown(int left){
-    int w, s=0;
-    for (int i=20; i<220; i++){
-        w = get_pixel(left, i, 3);
-        if (w > 127){
-        s++;
-    }
-    if(s>50){
-        return true;
-  }
-}
 
-boolean top(){
-  return checkAcross(60);
+bool top(){
+  return checkAcross(20);
 }
-boolean mid(){
+bool mid(){
   return checkAcross(120);
 }
-boolean bot(){
-  return checkAcross(180);
+bool bot(){
+  return checkAcross(200);
 }
-boolean left(){
+bool left(){
   return checkDown(30);
 }
-boolean right (){
+bool right (){
   return checkDown(290);
 }
 
+bool checkRed(){
+        for (int i= 80; i<210; i++){
+                int r = get_pixel(i, 120, 0);
+                int g = get_pixel(i,120,1);
+                int b = get_pixel(i,120,2);
+                if (r >200 && g < 100 && b < 100){ //theory for red detection
+                        printf("Red");
+                        return true;
+                }
+        }
+        return false;
+}
+
+void turnLeft(){
+        set_motor(1,60);
+        set_motor(2,60);
+        Sleep(0,200000);
+        set_motor(1,-60); 
+        set_motor(2,60);
+        Sleep(0,300000);
+        set_motor(1,60);
+        set_motor(2,60);
+        Sleep(0,200000);
+
+}
+
+void turnRight(){
+        set_motor(1,60);
+        set_motor(2,60);
+        Sleep(0,200000);
+        set_motor(1,60); 
+        set_motor(2,-60);
+        Sleep(0,300000);
+        set_motor(1,60);
+        set_motor(2,60);
+        Sleep(0,200000);
+
+}
 
 int main(){
 
@@ -115,7 +140,8 @@ int main(){
     select_IO(i,0);
     write_digital(i,1);
     }
-    set_PWM(1,186);
+
+    set_PWM(1,180);
     Sleep(2,0);
 
     set_motor(1,speed);
@@ -124,13 +150,13 @@ int main(){
     //open the gate
     connect_to_server("130.195.6.196", 1024);
     char password[24];
-    send_to_server("Please");
+     send_to_server("Please");
     receive_from_server(password);
     send_to_server(password);
     Sleep(1, 0);
     printf("Gate Open");
-*/
-    while(1){
+    */
+while(1){
         // take camera shot
         take_picture();
         //summing across image
@@ -140,28 +166,63 @@ int main(){
         int derivative_signal;
 
         current_error = returnError(120);
-          
+
         proportional_signal = current_error*kp;
 
         derivative_signal = (current_error - previous_error / 0.1) * kd;
         previous_error = current_error;
 
+        set_motor(1,speed + proportional_signal - derivative_signal);
+        set_motor(2,speed - proportional_signal + derivative_signal);
+
+        if (!top() && !mid() && !bot() && !left() && !right()){
+                set_motor(1,-50);
+                set_motor(2,-50);
+                Sleep(0,500000);
+                printf("Stop\n");
+        }
+
+         if(top() && mid() && bot() && left() && right()){
+                redStop  = true;
+                break;
+        }
+
+        //Sleep is last so the motors dont update too late.
+        Sleep(0,25);
+
+}
+while(1){
+        // take camera shot
+        take_picture();
+        //summing across image
+        intError = 0;
+        float current_error = 0;
+        float previous_error = 0;
+      int derivative_signal;
+
+        current_error = returnError(120);
+
+        proportional_signal = current_error*kp;
+
+        derivative_signal = (current_error - previous_error / 0.1) * kd;
+        previous_error = current_error;
+
+
+
+        if (checkRed() && redStop){ //theory for red detection
+                break;
+        }
+
         // turn left at a T junction
         if(!top() && mid() && bot() && left() && right()){
-                set_motor(1,50);
-                set_motor(2,50);
-                Sleep(0,200000);
-
-                set_motor(1,-50);
-                set_motor(2,50);
-                Sleep(0,500000);
+                turnLeft();
                 printf("t-junction\n");
+                redStop  = true;
         }
         // turn 180 at dead end
-        else if(!top() && !mid() && bot() && left() && right()){
-                set_motor(1,60);
-                set_motor(2,-60);
-                Sleep(1,0);
+        else if(!top() && !mid() && bot() && !left() && !right()){
+                turnRight();
+turnRight();
                 printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
@@ -172,29 +233,56 @@ int main(){
                 printf("Stop\n");
         // turn left at sharp corners.
         }else if(!top() && mid() && bot() && left() && !right()){
-                set_motor(1,-60); 
-                set_motor(2,60);
-                Sleep(0,200000);
+                turnLeft();
                 printf("Left\n");
         // turn right  at sharp corners.
         }else if(!top() && mid() && bot() && !left() && right()){
-                set_motor(1,60); 
-                set_motor(2,-60);
-                Sleep(0,200000); 
+                turnRight();
                 printf("Right\n");
-        }
-
-
+        }else{
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
+        }
 
         //Sleep is last so the motors c=dont update too late.
         Sleep(0,25);
-    }
+}    set_PWM(1,100);
+        Sleep(2,0);
 
-    set_PWM(1,60);
-    Sleep(2,0);
+        turnLeft();
+        printf("Turn");
 
+        set_motor(1,0);
+        set_motor(2,0);
+
+        while(0){
+        int dis = read_analog(0);
+        printf("%d\n",dis);     
+        Sleep(0,25);
+        }
+
+   // terminate hardware
+    close_screen_stream();
+    set_motor(1,0);
+    set_motor(2,0);
+
+    return 0;
+}
+
+    set_PWM(1,100);
+        Sleep(2,0);
+
+        turnLeft();
+        printf("Turn");
+
+        set_motor(1,0);
+        set_motor(2,0);
+
+        while(0){
+        int dis = read_analog(0);
+        printf("%d\n",dis);     
+        Sleep(0,25);
+        }
 
    // terminate hardware
     close_screen_stream();
