@@ -74,6 +74,21 @@ bool checkAcross(int height){
 return false;
 }
 
+bool checkDown(int pos){
+    int w, s=0;
+    for (int i=40; i<280; i++){
+        w = get_pixel(pos, i, 3);
+        if (w > 130){
+        s++;
+    }
+    if(s>30){
+        return true;
+  }
+}
+return false;
+}
+
+
 bool top(){
   return checkAcross(20);
 }
@@ -269,25 +284,4 @@ turnRight();
     return 0;
 }
 
-    set_PWM(1,100);
-        Sleep(2,0);
-
-        turnLeft();
-        printf("Turn");
-
-        set_motor(1,0);
-        set_motor(2,0);
-
-        while(0){
-        int dis = read_analog(0);
-        printf("%d\n",dis);     
-        Sleep(0,25);
-        }
-
-   // terminate hardware
-    close_screen_stream();
-    set_motor(1,0);
-    set_motor(2,0);
-
-    return 0;
-}
+   
