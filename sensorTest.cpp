@@ -87,7 +87,7 @@ int main(){
 	
 	int minDis = 400;
 	int maxDis = 500;
-    
+/*    
 	if(disRight < minDis && disRight > maxDis){
 		turnRightMaze();
 	}else if(disFront  < minDis && disFront > maxDis){
@@ -97,7 +97,9 @@ int main(){
 	}else{
 		turnRightMaze();
 	}
-   
+*/   
+	goFowardMaze();
+	
     int frontDistance = read_analog(1); //change channel later
     else if (frontDistance < 600){
         int signal = distance - 500;
