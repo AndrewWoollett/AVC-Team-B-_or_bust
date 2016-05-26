@@ -86,7 +86,7 @@ int main(){
 	int disLeft = read_analog(0);
 	
 	int minDis = 400;
-	int maxDis = 500;
+	int maxDis = 100;
 /*    
 	if(disRight < minDis && disRight > maxDis){
 		turnRightMaze();
