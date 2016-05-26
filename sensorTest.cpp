@@ -32,6 +32,40 @@ extern "C" int receive_from_server(char message[24]);
 
 float kpMaze = 0.001;
 
+void turnLeftMaze(){
+	int front = read_analog(2);
+	while(front > 300){
+		set_motor(1,50);
+		set_motor(2,-50);
+		front = read_analog(2);
+	}
+	set_motor(1,0);
+	set_motor(2,0);
+}
+
+void turnRightMaze(){
+	int front = read_analog(2);
+	while(front > 300){
+		set_motor(1,-50);
+		set_motor(2,50);
+		front = read_analog(2);
+	}
+	set_motor(1,0);
+	set_motor(2,0);
+}
+
+void goFowardMaze(){
+	int front = read_analog(2);
+	while(front > 400){
+		int distance = read_analog(3);
+		int signal = distance - 500;
+        int propSignal = signal * kpMaze;
+        set_motor(1, propsignal + speed);
+        set_motor(2, -propsignal + speed);
+	}
+	set_motor(1,0);
+	set_motor(2,0);
+}
 
 int main(){
 
@@ -48,9 +82,23 @@ int main(){
    while(1){
 
 
-    int rightDistance = read_analog(1);
-    if(rightDistance)
-
+    int disRight = read_analog(1);
+	int disFront = read_analog(2);
+	int disLeft = read_analog(3);
+	
+	int minDis = 400;
+	int maxDis = 500;
+    
+	if(disRight < minDis && disRight > maxDis){
+		turnRightMaze();
+	}else if(disFront  < minDis && disFront > maxDis){
+		goFowardMaze();
+	}else if(disLeft < minDis && disLeft > maxDis){
+		turnLeftMaze();
+	}else{
+		turnRightMaze();
+	}
+   
     int frontDistance = read_analog(3); //change channel later
     else if (frontDistance < 600){
         int signal = distance - 500;
