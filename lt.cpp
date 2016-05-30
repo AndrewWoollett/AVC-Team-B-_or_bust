@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
@@ -30,9 +31,11 @@ extern "C" int connect_to_server( char server_addr[15],int port);
 extern "C" int send_to_server(char message[24]);
 extern "C" int receive_from_server(char message[24]);
 
+bool gate = false;
 float kp = 0.003;        //tune this
 float kd = 0.0012;        //tune this
 
+int turnSpeed = 50;
 int speed = 50;
 int intError = 0;
 int proportional_signal = 0;
@@ -61,33 +64,34 @@ int returnError(int height){
 }
 
 bool checkAcross(int height){
+        bool white = false;
     int w, s=0;
-    for (int i=40; i<280; i++){
+    for (int i=0; i<320; i++){
         w = get_pixel(i, height, 3);
-        if (w > 130){
-        s++;
-    }
-    if(s>30){
-        return true;
-  }
-}
-return false;
+        if (w > 135){
+                s++;
+         }
+         if(s>20){
+                white =  true;
+        }
+   }
+return white;
 }
 
 bool checkDown(int pos){
+        bool white = false;
     int w, s=0;
-    for (int i=40; i<280; i++){
+    for (int i=0; i<190; i++){
         w = get_pixel(pos, i, 3);
-        if (w > 130){
+        if (w > 135){
         s++;
     }
-    if(s>30){
-        return true;
+    if(s>20){
+        white =  true;
   }
 }
-return false;
+return white;
 }
-
 
 bool top(){
   return checkAcross(20);
@@ -99,10 +103,10 @@ bool bot(){
   return checkAcross(200);
 }
 bool left(){
-  return checkDown(30);
+  return checkDown(10);
 }
 bool right (){
-  return checkDown(290);
+  return checkDown(310);
 }
 
 bool checkRed(){
@@ -119,29 +123,55 @@ bool checkRed(){
 }
 
 void turnLeft(){
-        set_motor(1,60);
-        set_motor(2,60);
-        Sleep(0,200000);
-        set_motor(1,-60); 
-        set_motor(2,60);
-        Sleep(0,300000);
-        set_motor(1,60);
-        set_motor(2,60);
-        Sleep(0,200000);
+
+        while(!top()){
+        take_picture();
+        set_motor(1,-turnSpeed);
+        set_motor(2,turnSpeed);
+
+        Sleep(0,25);
+        }
+
+        set_motor(1,speed);
+        set_motor(2,speed);
 
 }
 
 void turnRight(){
-        set_motor(1,60);
-        set_motor(2,60);
-        Sleep(0,200000);
-        set_motor(1,60); 
-        set_motor(2,-60);
-        Sleep(0,300000);
-        set_motor(1,60);
-        set_motor(2,60);
-        Sleep(0,200000);
 
+        while(!top()){
+        take_picture();
+        set_motor(1,turnSpeed);
+        set_motor(2,-turnSpeed);
+        Sleep(0,25);
+        }
+
+        set_motor(1,speed);
+        set_motor(2,speed);
+}
+float kpMaze = 0.06;
+
+void turnLeftMaze(){
+        float right  = read_analog(0);
+        set_motor(1,-50);
+        set_motor(2,60);
+}
+
+void turnRightMaze(){
+        float left  = read_analog(2);
+        set_motor(1,80);
+        set_motor(2,35);
+}
+
+void goFowardMaze(){
+        float front = read_analog(1);
+
+        float distance = read_analog(2);
+        float signal = distance - 550;
+        float propSignal = signal * kpMaze;
+        set_motor(1, -propSignal + speed);
+        set_motor(2, propSignal + speed);
+//      printf("%f\n",distance);
 }
 
 int main(){
@@ -158,20 +188,21 @@ int main(){
 
     set_PWM(1,180);
     Sleep(2,0);
-
-    set_motor(1,speed);
-    set_motor(2,speed);
 /*
     //open the gate
     connect_to_server("130.195.6.196", 1024);
     char password[24];
-     send_to_server("Please");
+    send_to_server("Please");
     receive_from_server(password);
     send_to_server(password);
     Sleep(1, 0);
+    gate = true;
     printf("Gate Open");
-    */
-while(1){
+    set_motor(1, speed);
+    set_motor(2, speed);
+    Sleep(3, 0);
+*/
+while(0){
         // take camera shot
         take_picture();
         //summing across image
@@ -205,7 +236,8 @@ while(1){
         //Sleep is last so the motors dont update too late.
         Sleep(0,25);
 
-}
+        }
+        speed = 45;
 while(1){
         // take camera shot
         take_picture();
@@ -213,7 +245,7 @@ while(1){
         intError = 0;
         float current_error = 0;
         float previous_error = 0;
-      int derivative_signal;
+        int derivative_signal;
 
         current_error = returnError(120);
 
@@ -237,7 +269,6 @@ while(1){
         // turn 180 at dead end
         else if(!top() && !mid() && bot() && !left() && !right()){
                 turnRight();
-turnRight();
                 printf("turn-180\n");
         }
         // stop and reverse when it cant see the line
@@ -254,34 +285,57 @@ turnRight();
         }else if(!top() && mid() && bot() && !left() && right()){
                 turnRight();
                 printf("Right\n");
-        }else{
+        }//else{
         set_motor(1,speed + proportional_signal - derivative_signal);
         set_motor(2,speed - proportional_signal + derivative_signal);
-        }
+       // }
 
         //Sleep is last so the motors c=dont update too late.
         Sleep(0,25);
-}    set_PWM(1,100);
-        Sleep(2,0);
+}
 
-        turnLeft();
-        printf("Turn");
+
+        set_PWM(1,100);
+
 
         set_motor(1,0);
         set_motor(2,0);
 
-        while(0){
-        int dis = read_analog(0);
-        printf("%d\n",dis);     
+while(0){
+        int dis = read_analog(2);
+        printf("%d\n",dis);
         Sleep(0,25);
         }
+speed = 45;
+while(1){
 
-   // terminate hardware
+        int disRight = read_analog(2);
+        int disFront = read_analog(1);
+        int disLeft = read_analog(0);
+
+        int minDis = 300;
+        int maxDis = 0;
+
+        if(disRight < 200){
+                printf("right \n");
+                turnRightMaze();
+        }else if(disFront < minDis){
+                goFowardMaze();
+                printf("forward \n");
+        }else if(disLeft < 200){
+                printf("left \n");
+                turnLeftMaze();
+        }else{
+        //      turnRightMaze();
+        }
+
+}
+        goFowardMaze();
+
+    // terminate hardware
     close_screen_stream();
     set_motor(1,0);
     set_motor(2,0);
 
     return 0;
 }
-
-   
